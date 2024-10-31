@@ -1,0 +1,48 @@
+{
+  "version": "0.1.0",
+  "description": "HNS ID MetaMask Snap",
+  "proposedName": "HNS ID Snap",
+  "source": {
+    "shasum": "MtVBWh4PdYUi6QSIqN9d+3ylZJ08wwkTHNHanFqylFQ=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
+        "packageName": "mm-snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": true
+    },
+    "endowment:network-access": {},
+    "endowment:page-home": {},
+    "endowment:ethereum-provider": {},
+    "endowment:transaction-insight": {},
+    "endowment:cronjob": {
+      "jobs": []
+    },
+    "snap_getEntropy": {},
+    "snap_manageState": {},
+    "snap_manageAccounts": {},
+    "snap_dialog": {},
+    "snap_notify": {},
+    "snap_getLocale": {},
+    "wallet_snap": {
+      "local:http://localhost:8080": {}
+    },
+    "endowment:keyring": {},
+    "endowment:name-lookup": {
+      "chains": [
+        "eip155:1",
+        "eip155:5"
+      ]
+    },
+    "endowment:webassembly": {},
+    "endowment:lifecycle-hooks": {}
+  },
+  "manifestVersion": "0.1"
+}

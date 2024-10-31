@@ -1,0 +1,27 @@
+{
+  "name": "mm-snap",
+  "version": "0.1.0",
+  "description": "HNS ID MetaMask Snap",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "mm-snap manifest --fix && mm-snap serve",
+    "build": "mm-snap build",
+    "serve": "mm-snap serve",
+    "watch": "mm-snap watch",
+    "start": "mm-snap watch"
+  },
+  "devDependencies": {
+    "@metamask/snaps-cli": "^6.5.1",
+    "@metamask/snaps-sdk": "^6.9.0",
+    "@metamask/utils": "^8.3.0",
+    "@types/node": "^18.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "viem": "^2.21.36"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "hns-id-mm-snap",
+  "version": "1.0.0",
+  "main": "index.js",
+  "workspaces": [
+    "src/*"
+  ],
+  "private": true,
+  "scripts": {
+    "dev": "yarn workspaces foreach -A --parallel run start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  },
+  "packageManager": "yarn@4.5.1"
+}
