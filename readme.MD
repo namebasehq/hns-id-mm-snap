@@ -22,7 +22,7 @@ This project provides a MetaMask Snap that allows HNS.id domains to resolve dire
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/namebasehq/hns-id-mm-snap
 cd hns-id-mm-snap
 ```
 
