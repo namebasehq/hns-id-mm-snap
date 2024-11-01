@@ -3,7 +3,7 @@
   "description": "HNS ID MetaMask Snap",
   "proposedName": "HNS ID Snap",
   "source": {
-    "shasum": "gjnr5kvxN0AGwdCQ1oJilfECKodGeYURhx9QmUmVv8M=",
+    "shasum": "rpmLmGfY38x30gU+74bnQThZyMcwDxuPFOFuPNY6lBE=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

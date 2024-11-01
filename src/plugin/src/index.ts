@@ -1,16 +1,14 @@
 import type { OnNameLookupHandler } from "@metamask/snaps-sdk";
-import { getAddr } from "./client";
-
+import { getAddr, getName } from "./client";
+import { chainInfo } from "./utils";
 
 export const onNameLookup: OnNameLookupHandler = async (request) => {
-
   try {
-    const data = await getAddr(request.domain);
-
+    const chain = chainInfo[request.chainId];
+    const data = await getAddr(request.domain, chain.coinType);
 
     // For domain resolution (when user types a name)
     if (request.domain && data) {
-
       return {
         resolvedAddresses: [
           {
@@ -23,15 +21,21 @@ export const onNameLookup: OnNameLookupHandler = async (request) => {
     }
 
     // // For reverse resolution (when user enters an address)
-    // if (request.address) {
-    //   await addLog(`Attempting reverse resolution for address: ${request.address}`);
-    //   return {
-    //     resolvedDomains: [{
-    //       resolvedDomain: 'myresolution.eth',
-    //       protocol: 'fixed resolver'
-    //     }]
-    //   };
-    // }
+    if (request.address) {
+      const resolvedDomain = await getName(
+        request.address as `0x${string}`,
+        chain.coinType
+      );
+
+      return {
+        resolvedDomains: [
+          {
+            resolvedDomain: resolvedDomain || '',
+            protocol: "hns.id",
+          }
+        ],
+      };
+    }
   } catch (error) {
     return null;
   }
