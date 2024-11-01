@@ -8,7 +8,7 @@
     "build": "mm-snap build",
     "serve": "mm-snap serve",
     "watch": "mm-snap watch",
-    "start": "mm-snap watch"
+    "start": "mm-snap manifest --fix && mm-snap watch"
   },
   "devDependencies": {
     "@metamask/snaps-cli": "^6.5.1",
