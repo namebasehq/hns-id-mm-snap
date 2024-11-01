@@ -1,7 +1,11 @@
 {
-  "name": "mm-snap",
+  "name": "hns-id-snap",
   "version": "0.1.0",
   "description": "HNS ID MetaMask Snap",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/namebasehq/hns-id-mm-snap.git"
+  },
   "main": "index.ts",
   "scripts": {
     "dev": "mm-snap manifest --fix && mm-snap serve",

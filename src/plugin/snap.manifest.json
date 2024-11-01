@@ -2,13 +2,17 @@
   "version": "0.1.0",
   "description": "HNS ID MetaMask Snap",
   "proposedName": "HNS ID Snap",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/namebasehq/hns-id-mm-snap.git"
+  },
   "source": {
-    "shasum": "rpmLmGfY38x30gU+74bnQThZyMcwDxuPFOFuPNY6lBE=",
+    "shasum": "LP10UJSP8BCCxF1/Ta0fckTKsWjLM8dSAxJMCE5k7Xk=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "mm-snap",
+        "packageName": "hns-id-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
