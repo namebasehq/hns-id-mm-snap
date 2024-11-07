@@ -1,18 +1,18 @@
 {
-  "version": "0.1.0",
-  "description": "HNS ID MetaMask Snap",
-  "proposedName": "HNS ID Snap",
+  "version": "0.1.13",
+  "description": "Resolve hns.id domains in Metamask. Also supports ENS resolution on multiple chains.",
+  "proposedName": "HNS ID Name Resolution",
   "repository": {
     "type": "git",
     "url": "https://github.com/namebasehq/hns-id-mm-snap.git"
   },
   "source": {
-    "shasum": "LP10UJSP8BCCxF1/Ta0fckTKsWjLM8dSAxJMCE5k7Xk=",
+    "shasum": "Hu/FXZwmOSbZu6cErpcZbIvCTyepIJT7ioDlYqgr8T8=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "hns-id-snap",
+        "packageName": "hns-id",
         "registry": "https://registry.npmjs.org/"
       }
     }
@@ -22,10 +22,20 @@
     "endowment:name-lookup": {
       "chains": [
         "eip155:1",
-        "eip155:10",
+        "eip155:56",
         "eip155:137",
+        "eip155:250",
+        "eip155:1088",
+        "eip155:1284",
+        "eip155:1285",
+        "eip155:1313161554",
         "eip155:43114",
-        "eip155:42161"
+        "eip155:8217",
+        "eip155:42220",
+        "eip155:100",
+        "eip155:10",
+        "eip155:42161",
+        "eip155:8453"
       ]
     }
   },
