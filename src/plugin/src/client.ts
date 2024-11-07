@@ -3,12 +3,10 @@ import {
   namehash,
   http,
   zeroAddress,
-  getAddress,
 } from "viem";
 import { normalize } from "viem/ens";
 import { optimism, mainnet } from "viem/chains";
 import abi from "./abi.json";
-import { get } from "http";
 import { getChainInfoByCoinType } from "./utils";
 
 export const publicClient = createPublicClient({
@@ -22,9 +20,11 @@ export const l1PublicClient = createPublicClient({
 });
 
 type AddressResponse = {
-  protocol: "hns.id" | "ENS" | `ENS - ${string}`;
+  protocol: `hns.id - ${string}` | `ENS - ${string}`;
   address: string;
 };
+
+const RESOLVER_ADDRESS = "0xDDa56f06D80f3D8E3E35159701A63753f39c3BCB";
 
 export const getAddr = async (
   domain: string | undefined,
@@ -38,13 +38,13 @@ export const getAddr = async (
 
   try {
     const address = (await publicClient.readContract({
-      address: "0xDDa56f06D80f3D8E3E35159701A63753f39c3BCB",
+      address: RESOLVER_ADDRESS,
       abi,
       functionName: "addr",
       args: [node, coinType],
     })) as string;
 
-    return { address, protocol: "hns.id" };
+    return { address, protocol: `hns.id - ${chain?.name}` };
   } catch (error) {
     const address = await l1PublicClient.getEnsAddress({
       name: normalize(domain),
@@ -65,7 +65,7 @@ export const getName = async (
 
   try {
     const name = (await publicClient.readContract({
-      address: "0xDDa56f06D80f3D8E3E35159701A63753f39c3BCB",
+      address: RESOLVER_ADDRESS,
       abi,
       functionName: "getName",
       args: [address, coinType],

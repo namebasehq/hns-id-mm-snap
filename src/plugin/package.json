@@ -1,7 +1,7 @@
 {
-  "name": "hns-id-snap",
-  "version": "0.1.2",
-  "description": "HNS ID MetaMask Snap",
+  "name": "hns-id",
+  "version": "0.1.13",
+  "description": "Resolve hns.id domains in Metamask. Also supports ENS resolution on multiple chains.",
   "repository": {
     "type": "git",
     "url": "https://github.com/namebasehq/hns-id-mm-snap.git"

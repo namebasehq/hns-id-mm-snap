@@ -44,7 +44,7 @@ This command will run the following script:
 This ensures that both `mm-snap-site` and `plugin` are started together in parallel.
 
 ### 4. Using the MetaMask Snap
-- **Install MetaMask Flask**: Make sure to install MetaMask Flask, as the Snap functionality is only supported there. You can install it from [MetaMask Flask](https://chrome.google.com/webstore/detail/metamask-flask/ljfoeinjpaedjfecbmggjgodbgkmjkjk).
+- **Install MetaMask Flask**: Make sure to install MetaMask Flask, as the Snap functionality is only supported there (until whitelisted by Metamask). You can install it from [MetaMask Flask](https://chrome.google.com/webstore/detail/metamask-flask/ljfoeinjpaedjfecbmggjgodbgkmjkjk).
 - **Connect MetaMask**: Open the browser and go to the React app.
 - Use the provided interface to connect the MetaMask Snap, send requests, or view logs.
 
