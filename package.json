@@ -1,6 +1,6 @@
 {
   "name": "hns-id-mm-snap",
-  "version": "1.0.0",
+  "version": "0.1.13",
   "main": "index.js",
   "workspaces": [
     "src/*"

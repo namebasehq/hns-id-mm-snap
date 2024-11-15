@@ -51,6 +51,8 @@ export const getAddr = async (
       coinType,
       strict: true,
     });
+
+    // we include this because metamask does not support CCIP domains outside of mainnet
     return { address: address?.toString() ?? zeroAddress, protocol: `ENS - ${chain?.name}` };
   }
 };

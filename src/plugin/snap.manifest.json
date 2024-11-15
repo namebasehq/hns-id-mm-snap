@@ -1,13 +1,13 @@
 {
   "version": "0.1.13",
-  "description": "Resolve hns.id domains in Metamask. Also supports ENS resolution on multiple chains.",
+  "description": "Resolve hns.id domains natively on multiple EVM blockchains.",
   "proposedName": "HNS ID Name Resolution",
   "repository": {
     "type": "git",
     "url": "https://github.com/namebasehq/hns-id-mm-snap.git"
   },
   "source": {
-    "shasum": "Hu/FXZwmOSbZu6cErpcZbIvCTyepIJT7ioDlYqgr8T8=",
+    "shasum": "gSgMQTY+Y52Sg22z8tgaci2kqxx4CUKiTUHEnh5Lccg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
