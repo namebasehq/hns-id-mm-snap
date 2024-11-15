@@ -1,5 +1,5 @@
 {
-  "version": "0.1.13",
+  "version": "0.1.16",
   "description": "Resolve hns.id domains natively on multiple EVM blockchains.",
   "proposedName": "HNS ID Name Resolution",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/namebasehq/hns-id-mm-snap.git"
   },
   "source": {
-    "shasum": "gSgMQTY+Y52Sg22z8tgaci2kqxx4CUKiTUHEnh5Lccg=",
+    "shasum": "mXQW3g18buic9nB20A9PYjYH94XkKQpYwckVXvKEKEg=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

@@ -1,6 +1,6 @@
 {
   "name": "hns-id",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Resolve hns.id domains in Metamask. Also supports ENS resolution on multiple chains.",
   "repository": {
     "type": "git",
