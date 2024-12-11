@@ -7,7 +7,7 @@ import { ripemd160 } from '@noble/hashes/ripemd160';
 import { HandshakeRPC } from './hns-rpc';
 import { SnapLogger } from './logger';
 import { bech32 } from '@scure/base';
-import { blake2b } from 'blakejs';
+
 
 const rpc = new HandshakeRPC('http://188.166.151.44:12037/', 'hs_f6d2e4a8c9b3719k5n2m4p7q8');
 const logger = SnapLogger.getInstance();
@@ -40,6 +40,8 @@ export async function getState(): Promise<SnapState> {
     return initialState;
   }
 
+
+ 
   const isValidState = (state: Record<string, Json>): state is SnapState => {
     return (
       Array.isArray(state.addresses) &&
@@ -80,6 +82,8 @@ interface BIP32Response {
 
 const HNS_PATH = "m/44'/5353'/0'/0/";
 
+
+
 async function getAddressBalance(address: string): Promise<{
   address: string;
   balance: number;
@@ -87,9 +91,6 @@ async function getAddressBalance(address: string): Promise<{
 }> {
   try {
     const info = await rpc.getAddressInfo(address);
-    const test = await rpc.getAddressHistory(address);
-
-    logger.debug(`${address} History:`, { test });
     return {
       address,
       balance: info.balance,
@@ -104,46 +105,36 @@ async function getAddressBalance(address: string): Promise<{
     };
   }
 }
+function publicKeyToAddress(publicKey: Uint8Array): string {
+  const sha = sha256(publicKey);
+  const hash = ripemd160(sha);
+  const words = bech32.toWords(hash);
+  const address = bech32.encode('hs', words);
 
-
-
-function publicKeyToAddress(publicKey: Uint8Array): `${string}1${string}` {
-  // Step 1: Hash the public key using Blake2b with a 20-byte output
-  const hash = blake2b(publicKey, undefined, 20); // `undefined` for no key, `20` for output length
-
-  // Step 2: Encode the hash into a Bech32 address
-  const version = 0; // Handshake uses version 0 for standard addresses
-  const words = bech32.toWords(hash); // Convert the hash to Bech32 words
-  const address = bech32.encode('hs', [version, ...words]); // Prefix with version
-
-  // Optional: Validate the generated address
   if (!isValidHandshakeAddress(address)) {
-    throw new Error(`Generated invalid Handshake address: ${address}`);
+    throw new Error(`Generated an invalid Handshake address: ${address}`);
   }
 
   return address;
 }
 
-function isValidHandshakeAddress(address: `${string}1${string}`): boolean {
+function isValidHandshakeAddress(address: string): boolean {
   try {
-    const { prefix, words } = bech32.decode(address); // Decode the address
-    const version = words[0]; // Extract version
-    const hash = bech32.fromWords(words.slice(1)); // Extract hash
-    const reencoded = bech32.encode(prefix, [version, ...bech32.toWords(hash)]); // Re-encode it
-    return reencoded === address; // Verify it matches
+    const decoded = bech32.decode(address as `${string}1${string}`);
+    // Re-encode and compare to ensure the checksum matches
+    const reencoded = bech32.encode(decoded.prefix as `${string}1${string}`, decoded.words);
+    return reencoded === address;
   } catch (error) {
     console.error('Invalid Handshake address:', address, error);
     return false;
   }
 }
 
-async function deriveAddresses(count: number): Promise<
-  Array<{
-    address: string;
-    balance: number;
-    unconfirmed: number;
-  }>
-> {
+async function deriveAddresses(count: number): Promise<Array<{
+  address: string;
+  balance: number;
+  unconfirmed: number;
+}>> {
   try {
     const response = (await snap.request({
       method: 'snap_getBip32Entropy',
@@ -153,25 +144,9 @@ async function deriveAddresses(count: number): Promise<
       },
     })) as unknown as BIP32Response;
 
-    // Ensure privateKey and chainCode are sanitized (remove "0x" prefix if present)
-    const privateKeyHex = response.privateKey.startsWith('0x')
-      ? response.privateKey.slice(2)
-      : response.privateKey;
-
-    const chainCodeHex = response.chainCode.startsWith('0x')
-      ? response.chainCode.slice(2)
-      : response.chainCode;
-
-    // Convert hex strings to Uint8Array
-    const privateKey = hexToBytes(privateKeyHex);
-    const chainCode = hexToBytes(chainCodeHex);
-
-    // Initialize HDKey
-    const hdKey = new HDKey({
-      privateKey,
-      chainCode,
-    });
-
+    const privateKey = hexToBytes(response.privateKey.slice(2));
+    const hdKey = HDKey.fromMasterSeed(privateKey);
+    
     const addresses = [];
     for (let i = 0; i < count; i++) {
       const path = `${HNS_PATH}${i}`;
@@ -181,10 +156,7 @@ async function deriveAddresses(count: number): Promise<
       }
 
       const address = publicKeyToAddress(child.publicKey);
-      if (!isValidHandshakeAddress(address)) {
-        throw new Error(`Invalid Handshake address generated: ${address}`);
-      }
-
+      console.log(`Derived Path: ${path}, Address: ${address}`);
       const balance = await getAddressBalance(address);
       addresses.push(balance);
     }
@@ -195,7 +167,6 @@ async function deriveAddresses(count: number): Promise<
     throw error;
   }
 }
-
 
 function formatHNS(amount: number): string {
   return `${amount.toFixed(6)} HNS`;
