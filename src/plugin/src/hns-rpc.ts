@@ -68,4 +68,24 @@ export class HandshakeRPC {
     async getName(name: string): Promise<any> {
       return this.request(`/name/${name}`);
     }
+
+    async getAddressUTXOs(address: string): Promise<Array<{
+      hash: string;      // Transaction hash
+      index: number;     // Output index in the transaction
+      address: string;   // Address that owns this UTXO
+      value: number;     // Amount in HNS (converted from dollaritos/mHNS)
+      height: number;    // Block height where this UTXO was created
+      coinbase: boolean; // Whether this is a coinbase (mining reward) transaction
+    }>> {
+      const data = await this.request(`/coin/address/${address}`);
+      
+      return data.map((utxo: any) => ({
+        hash: utxo.hash,
+        index: utxo.index,
+        address: utxo.address,
+        value: utxo.value / 1e6, // Convert from dollaritos to HNS
+        height: utxo.height,
+        coinbase: utxo.coinbase || false
+      }));
+    }
   }

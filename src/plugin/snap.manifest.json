@@ -7,7 +7,7 @@
     "url": "https://github.com/namebasehq/hns-id-mm-snap.git"
   },
   "source": {
-    "shasum": "MQmZUCHawMAlOCWbbrHYIUNBn5X8Sl8ehrb+RxJrEq8=",
+    "shasum": "RGwWnCBrR3BwZorJ+MMyd6gcF6XqDJ/VJH8QsD4Agbo=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -20,14 +20,9 @@
   "initialPermissions": {
     "snap_manageState": {},
     "snap_dialog": {},
-    "snap_getBip32Entropy": [
+    "snap_getBip44Entropy": [
       {
-        "path": [
-          "m",
-          "44'",
-          "5353'"
-        ],
-        "curve": "secp256k1"
+        "coinType": 5353
       }
     ],
     "endowment:network-access": {},

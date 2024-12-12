@@ -8,7 +8,7 @@ import {
 } from "@metamask/snaps-sdk";
 import { getAddr, getName } from "./client";
 import { chainInfo } from "./utils";
-import { getState, handleWalletRequest, setState, showWalletInterface, updateWalletInterface } from "./wallet";
+import { getState, handleWalletRequest, setState, showWalletInterface, updateWalletInterface } from "./wallet1";
 import { SnapLogger, LogLevel } from './logger';
 
 // Get logger instance
