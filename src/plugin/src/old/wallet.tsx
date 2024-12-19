@@ -1,13 +1,26 @@
-import { Box, Text, Heading, Button, Copyable, Divider, Section } from '@metamask/snaps-sdk/jsx';
-import type { Json } from '@metamask/snaps-sdk';
-import { getBIP44AddressKeyDeriver } from "@metamask/key-tree";
-import { hexToBytes } from '@noble/hashes/utils';
-import { HandshakeRPC } from './hns-rpc';
-import { SnapLogger } from './logger';
-import { bech32 } from '@scure/base';
-import { blake2b } from 'blakejs';
+import {
+  Box,
+  Text,
+  Heading,
+  Button,
+  Copyable,
+  Divider,
+  Section,
+} from "@metamask/snaps-sdk/jsx";
+import type { Json } from "@metamask/snaps-sdk";
+import { HDKey } from "@scure/bip32";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
+import { sha256 } from "@noble/hashes/sha256";
+import { ripemd160 } from "@noble/hashes/ripemd160";
+import { HandshakeRPC } from "../hns-rpc";
+import { SnapLogger } from "../logger";
+import { bech32 } from "@scure/base";
+import { blake2b } from "blakejs";
 
-const rpc = new HandshakeRPC('http://188.166.151.44:12037/', 'hs_f6d2e4a8c9b3719k5n2m4p7q8');
+const rpc = new HandshakeRPC(
+  "http://188.166.151.44:12037/",
+  "hs_f6d2e4a8c9b3719k5n2m4p7q8"
+);
 const logger = SnapLogger.getInstance();
 
 type JsonSerializable = {
@@ -18,7 +31,6 @@ type SnapState = JsonSerializable & {
   addresses: Array<{
     address: string;
     balance: number;
-    unconfirmed: number;
   }>;
   selectedIndex: number;
 };
@@ -29,11 +41,11 @@ const initialState: SnapState = {
 };
 
 export async function getState(): Promise<SnapState> {
-  const state = await snap.request({
-    method: 'snap_manageState',
-    params: { operation: 'get' },
-  }) as Record<string, Json> | null;
-  
+  const state = (await snap.request({
+    method: "snap_manageState",
+    params: { operation: "get" },
+  })) as Record<string, Json> | null;
+
   if (!state) {
     return initialState;
   }
@@ -41,12 +53,13 @@ export async function getState(): Promise<SnapState> {
   const isValidState = (state: Record<string, Json>): state is SnapState => {
     return (
       Array.isArray(state.addresses) &&
-      state.addresses.every(addr => 
-        typeof (addr as any).address === 'string' &&
-        typeof (addr as any).balance === 'number' &&
-        typeof (addr as any).unconfirmed === 'number'
+      state.addresses.every(
+        (addr) =>
+          typeof (addr as any).address === "string" &&
+          typeof (addr as any).balance === "number" &&
+          typeof (addr as any).unconfirmed === "number"
       ) &&
-      typeof state.selectedIndex === 'number'
+      typeof state.selectedIndex === "number"
     );
   };
 
@@ -57,8 +70,8 @@ export async function setState(newState: Partial<SnapState>): Promise<void> {
   const currentState = await getState();
   const updatedState = { ...currentState, ...newState } as Record<string, Json>;
   await snap.request({
-    method: 'snap_manageState',
-    params: { operation: 'update', newState: updatedState },
+    method: "snap_manageState",
+    params: { operation: "update", newState: updatedState },
   });
 }
 
@@ -70,6 +83,14 @@ interface WalletRequest {
   };
 }
 
+interface BIP32Response {
+  privateKey: string;
+  publicKey: string;
+  chainCode: string;
+}
+
+const HNS_PATH = "m/44'/5353'/0'/0/";
+
 async function getAddressBalance(address: string): Promise<{
   address: string;
   balance: number;
@@ -77,13 +98,11 @@ async function getAddressBalance(address: string): Promise<{
 }> {
   try {
     const info = await rpc.getAddressInfo(address);
-    const test = await rpc.getAddressHistory(address);
 
-    logger.debug(`${address} History:`, { test });
     return {
       address,
       balance: info.balance,
-      unconfirmed: info.unconfirmedBalance,
+      unconfirmed: 0,
     };
   } catch (error) {
     console.error(`Error fetching balance for ${address}:`, error);
@@ -97,13 +116,14 @@ async function getAddressBalance(address: string): Promise<{
 
 function publicKeyToAddress(publicKey: Uint8Array): `${string}1${string}` {
   // Step 1: Hash the public key using Blake2b with a 20-byte output
-  const hash = blake2b(publicKey, undefined, 20);
+  const hash = blake2b(publicKey, undefined, 20); // `undefined` for no key, `20` for output length
 
   // Step 2: Encode the hash into a Bech32 address
   const version = 0; // Handshake uses version 0 for standard addresses
-  const words = bech32.toWords(hash);
-  const address = bech32.encode('hs', [version, ...words]);
+  const words = bech32.toWords(hash); // Convert the hash to Bech32 words
+  const address = bech32.encode("hs", [version, ...words]); // Prefix with version
 
+  // Optional: Validate the generated address
   if (!isValidHandshakeAddress(address)) {
     throw new Error(`Generated invalid Handshake address: ${address}`);
   }
@@ -113,13 +133,13 @@ function publicKeyToAddress(publicKey: Uint8Array): `${string}1${string}` {
 
 function isValidHandshakeAddress(address: `${string}1${string}`): boolean {
   try {
-    const { prefix, words } = bech32.decode(address);
-    const version = words[0];
-    const hash = bech32.fromWords(words.slice(1));
-    const reencoded = bech32.encode(prefix, [version, ...bech32.toWords(hash)]);
-    return reencoded === address;
+    const { prefix, words } = bech32.decode(address); // Decode the address
+    const version = words[0]; // Extract version
+    const hash = bech32.fromWords(words.slice(1)); // Extract hash
+    const reencoded = bech32.encode(prefix, [version, ...bech32.toWords(hash)]); // Re-encode it
+    return reencoded === address; // Verify it matches
   } catch (error) {
-    console.error('Invalid Handshake address:', address, error);
+    console.error("Invalid Handshake address:", address, error);
     return false;
   }
 }
@@ -132,31 +152,42 @@ async function deriveAddresses(count: number): Promise<
   }>
 > {
   try {
-    // Get the Handshake coin_type node
-    const hnsNode = await snap.request({
-      method: 'snap_getBip44Entropy',
+    const response = (await snap.request({
+      method: "snap_getBip32Entropy",
       params: {
-        coinType: 5353,
+        path: ["m", "44'", "5353'"],
+        curve: "secp256k1",
       },
-    });
+    })) as unknown as BIP32Response;
 
-    // Create the address deriver
-    const deriveHNSAddress = await getBIP44AddressKeyDeriver(hnsNode);
+    // Ensure privateKey and chainCode are sanitized (remove "0x" prefix if present)
+    const privateKeyHex = response.privateKey.startsWith("0x")
+      ? response.privateKey.slice(2)
+      : response.privateKey;
+
+    const chainCodeHex = response.chainCode.startsWith("0x")
+      ? response.chainCode.slice(2)
+      : response.chainCode;
+
+    // Convert hex strings to Uint8Array
+    const privateKey = hexToBytes(privateKeyHex);
+    const chainCode = hexToBytes(chainCodeHex);
+
+    // Initialize HDKey
+    const hdKey = new HDKey({
+      privateKey,
+      chainCode,
+    });
 
     const addresses = [];
     for (let i = 0; i < count; i++) {
-      // Derive the address key
-      const derived = await deriveHNSAddress(i);
+      const path = `${HNS_PATH}${i}`;
+      const child = hdKey.derive(path);
+      if (!child.publicKey) {
+        throw new Error("Failed to derive public key");
+      }
 
-      logger.info(`Derived address ${i}:`, {
-        publicKey: derived.publicKey,
-        privateKey: derived.privateKey,
-        address: derived.address
-      });
-      // Convert hex string public key to Uint8Array
-      const publicKeyBytes = hexToBytes(derived.publicKey.replace('0x', ''));
-      const address = publicKeyToAddress(publicKeyBytes);
-      
+      const address = publicKeyToAddress(child.publicKey);
       if (!isValidHandshakeAddress(address)) {
         throw new Error(`Invalid Handshake address generated: ${address}`);
       }
@@ -167,7 +198,7 @@ async function deriveAddresses(count: number): Promise<
 
     return addresses;
   } catch (error) {
-    console.error('Error deriving addresses:', error);
+    console.error("Error deriving addresses:", error);
     throw error;
   }
 }
@@ -176,10 +207,15 @@ function formatHNS(amount: number): string {
   return `${amount.toFixed(6)} HNS`;
 }
 
-function getSummaryPanel(addresses: Array<{ balance: number; unconfirmed: number }>) {
+function getSummaryPanel(
+  addresses: Array<{ balance: number; unconfirmed: number }>
+) {
   const totalBalance = addresses.reduce((sum, addr) => sum + addr.balance, 0);
-  const totalUnconfirmed = addresses.reduce((sum, addr) => sum + addr.unconfirmed, 0);
-  
+  const totalUnconfirmed = addresses.reduce(
+    (sum, addr) => sum + addr.unconfirmed,
+    0
+  );
+
   return (
     <Section>
       <Heading>Summary</Heading>
@@ -191,12 +227,14 @@ function getSummaryPanel(addresses: Array<{ balance: number; unconfirmed: number
   );
 }
 
-function getAddressPanel(address: {
-  address: string;
-  balance: number;
-  unconfirmed: number;
-}, index: number) {
-  const HNS_PATH = "m/44'/5353'/0'/0/";
+function getAddressPanel(
+  address: {
+    address: string;
+    balance: number;
+    unconfirmed: number;
+  },
+  index: number
+) {
   return (
     <Section>
       <Text>Address:</Text>
@@ -212,7 +250,7 @@ function getAddressPanel(address: {
 
 function getWalletInterface(state: SnapState) {
   const selected = state.addresses[state.selectedIndex];
-  
+
   return (
     <Box>
       <Heading>HNS Wallet</Heading>
@@ -220,10 +258,7 @@ function getWalletInterface(state: SnapState) {
       {getSummaryPanel(state.addresses)}
       <Divider />
       <Box direction="horizontal" alignment="center">
-        <Button
-          name="prev-address"
-          disabled={state.selectedIndex === 0}
-        >
+        <Button name="prev-address" disabled={state.selectedIndex === 0}>
           Previous
         </Button>
         <Button
@@ -242,7 +277,7 @@ export async function createWalletInterface(state: SnapState) {
   const interfaceId = await snap.request({
     method: "snap_createInterface",
     params: {
-      ui: getWalletInterface(state)
+      ui: getWalletInterface(state),
     },
   });
 
@@ -257,19 +292,19 @@ export async function updateWalletInterface(id: string, state: SnapState) {
       ui: getWalletInterface(state),
     },
   });
-  logger.debug('Interface updated');
+  logger.debug("Interface updated");
 }
 
 export async function handleUserInput(buttonName: string, interfaceId: string) {
   const state = await getState();
 
   switch (buttonName) {
-    case 'prev-address':
+    case "prev-address":
       if (state.selectedIndex > 0) {
         await setState({ selectedIndex: state.selectedIndex - 1 });
       }
       break;
-    case 'next-address':
+    case "next-address":
       if (state.selectedIndex < state.addresses.length - 1) {
         await setState({ selectedIndex: state.selectedIndex + 1 });
       }
@@ -281,13 +316,13 @@ export async function handleUserInput(buttonName: string, interfaceId: string) {
 }
 
 export async function showWalletInterface(addressCount?: number) {
-  logger.debug('Showing wallet interface', { addressCount });
+  logger.debug("Showing wallet interface", { addressCount });
   try {
     const state = await getState();
-    logger.debug('Current state:', state);
-    
+    logger.debug("Current state:", state);
+
     if (state.addresses.length === 0 && addressCount) {
-      logger.debug('Deriving new addresses');
+      logger.debug("Deriving new addresses");
       const newAddresses = await deriveAddresses(addressCount);
       await setState({ addresses: newAddresses });
       state.addresses = newAddresses;
@@ -304,16 +339,16 @@ export async function showWalletInterface(addressCount?: number) {
       },
     });
   } catch (error) {
-    logger.error('Error in wallet interface:', { error });
+    logger.error("Error in wallet interface:", { error });
     throw error;
   }
 }
 
 export async function handleWalletRequest(request: WalletRequest) {
   switch (request.method) {
-    case 'wallet_getAddresses':
+    case "wallet_getAddresses":
       return showWalletInterface(request.params?.count);
     default:
-      throw new Error('Wallet method not found.');
+      throw new Error("Wallet method not found.");
   }
 }
